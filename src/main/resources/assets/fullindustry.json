@@ -1,0 +1,62 @@
+{
+    "statusCode": "OK",
+    "serviceName": "OurExpertiseDetails",
+    "data": {
+        "industrySnapshot": {
+            "heading": "Biotechnology Research Services",
+            "description": "We know a little about your industry.\r\nHow do our insights compare to your unique business?",
+            "industryId": "304",
+            "name": "Biotechnology Research Services",
+            "coverImage": "https://app.verticaliq.com/system/ecomm_images/report_cover_images/biotechnology-research-services.jpg",
+            "brainsharkId": "41817288"
+        },
+        "industryStats": {
+            "statsImageName": "Business_Services"
+        },
+        "industryInsight": {
+            "edition": "1st Quarter 2019",
+            "text": "Researchers in Scotland said they've genetically modified hens to lay eggs containing a protein used to treat cancer. Protein-based drugs commonly used to treat cancer and other diseases are typically produced in sterilized rooms inside factories. The modified chickens live in standard chicken coups and produce those proteins in their egg whites at a cost anywhere from 10 to 100 times less than factory-produced protein. The Food and Drug Administration approved an earlier chicken-sourced drug, Kanuma, in 2015.",
+            "title": "Research on Chickens Continues Paying Off"
+        },
+        "industryProfileDrivers": [
+            {
+                "body": "Firms engaged in the discovery phase of biotech research need to efficiently and effectively screen thousands of potential compounds to identify the most promising candidates for further research. They rely on science experts, state-of-the-art lab facilities, and, increasingly, advanced information systems to improve the success rate in finding new compounds and shorten the research timeline. A firm’s productivity in discovering new compounds is key to obtaining client contracts or outside funding for research activities.",
+                "position": 1,
+                "title": "Productive Research Process"
+            },
+            {
+                "body": "CROs bid on projects for clients and must accurately estimate the cost of conducting research to competitively price their bid. Many projects are fixed cost engagements, which puts even more pressure on accurate pricing to avoid cost overruns. Firms must document in detail the work they will perform so they can charge extra for items out of scope. They must also build in some contingency costs to cover uncertainty in estimates of project effort and costs.",
+                "position": 2,
+                "title": "Accurate Estimation and Pricing of Client Contracts"
+            },
+            {
+                "body": "Once a contract is won, CROs must effectively manage the clinical trial process to meet schedule and cost targets and comply with FDA requirements and Good Clinical Practices. They rely on experienced project managers to effectively lead projects and a database of results from previous projects to identify best practices and avoid problems. ",
+                "position": 3,
+                "title": "Effective Management of Clinical Trials"
+            }
+        ],
+        "industryTrends": {
+            "heading": "Industry Trends",
+            "trends": [
+                {
+                    "body": "Research and development expenditures by biopharmaceutical companies, the main client industry for biotechnology research, are expected to grow at a moderate rate. Expenditures totaled approximately $283 billion in 2016 and were projected to increase at 3% annually through 2020, according to ISR Research. The need to replenish lost revenues resulting from the patent expirations of a large number of high‑profile drugs in recent years has prompted biopharmaceutical companies to boost R&D expenditures to eventually fill this revenue void with new drug approvals. The push to discover the next big drug has created a favorable environment for raising capital. ",
+                    "position": 1,
+                    "title": "Growth for R&D Spending"
+                },
+                {
+                    "body": "Demand for contract research services is projected to grow, driven by increases in R&D budgets and a preference towards outsourcing. The worldwide contract research organization (CRO) market was approximately $32 billion in 2016 and expected to grow at a CAGR of 7% to $44 billion in 2021, according to ISR Research. Approximately 37% of Phase I through IV of clinical development spend is outsourced to CROs, and levels of penetration are expected to increase to approximately 45% by 2021. Outsourcing is expected to continue to be more popular due to the need to maximize R&D productivity, the increasing burden of clinical trial complexity, and the desire to pursue simultaneous registration in multiple countries.",
+                    "position": 2,
+                    "title": "Demand for CRO Services Rises"
+                },
+                {
+                    "body": "Employment growth in the biotech research and development industry has been robust over the last four years. Employment increased 7.3% in 2017, 9.8% in 2016, 7.1% in 2015, and 3.7% in 2014. Although growth was slower between 2012 and 2014, two industry subsectors - research, testing, and medical labs and drugs and pharmaceuticals – showed employment increases of more than 3%, according to the Biotechnology Innovation Organization (BIO). Among technology sectors, the bioscience industry has been a leading contributor to employment since 2001. ",
+                    "position": 3,
+                    "title": "Robust Employment Growth"
+                }
+            ]
+        },
+        "industryCharts": {
+            "revenue": "https://content.verticaliq.com/charts/biotechnology-research-services_how_firms_operate_revenue.png"
+        }
+    }
+}

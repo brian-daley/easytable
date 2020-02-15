@@ -41,13 +41,13 @@ public class ExcelLikeExampleTest {
     @Test
     public void createDocumentWithExcelLikeTables() throws IOException {
         TestUtils.createAndSaveDocumentWithTables("excelLike.pdf",
-                createSimpleExampleTable(),
+                //createSimpleExampleTable(),
                 createComplexExampleTable()
         );
     }
 
     private Table createSimpleExampleTable() {
-        
+
         final TableBuilder tableBuilder = Table.builder()
                 .addColumnsOfWidth(100, 50, 50, 50)
                 .fontSize(8)

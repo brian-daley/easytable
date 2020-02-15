@@ -64,7 +64,8 @@ public class TestUtils {
 
         }
 
-        document.save(TARGET_FOLDER + "/" + outputFileName);
+        //document.save(TARGET_FOLDER + "/" + outputFileName);
+        document.save(outputFileName);
         document.close();
 
     }
