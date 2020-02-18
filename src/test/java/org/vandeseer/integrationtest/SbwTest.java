@@ -1,8 +1,9 @@
 package org.vandeseer.integrationtest;
 
 import static java.awt.Color.BLACK;
-import static java.awt.Color.RED;
+import static java.awt.Color.BLUE;
 import static java.awt.Color.WHITE;
+import static org.apache.pdfbox.pdmodel.font.PDType1Font.COURIER_BOLD;
 import static org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA;
 import static org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA_BOLD;
 import static org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA_OBLIQUE;
@@ -20,18 +21,14 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.PageMode;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.apache.pdfbox.pdmodel.graphics.shading.PDShadingType1;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageXYZDestination;
@@ -48,6 +45,10 @@ import org.vandeseer.easytable.structure.cell.ImageCell;
 import org.vandeseer.easytable.structure.cell.ImageCell.ImageCellBuilder;
 import org.vandeseer.easytable.structure.cell.TextCell;
 import org.vandeseer.easytable.structure.cell.TextCell.TextCellBuilder;
+import org.vandeseer.easytable.structure.cell.paragraph.Hyperlink;
+import org.vandeseer.easytable.structure.cell.paragraph.Markup;
+import org.vandeseer.easytable.structure.cell.paragraph.ParagraphCell;
+import org.vandeseer.easytable.structure.cell.paragraph.StyledText;
 
 public class SbwTest {
 
@@ -63,6 +64,10 @@ public class SbwTest {
     private static final float PADDING_Y = 30f;
     private static final float PADDING_Y_BETWEEN_TABLES = 12f;
 
+    public static final Color keyRedBackground = new Color(164, 0, 0, 255);
+    public static final Color lowAlphaWhite = new Color(255, 255, 255, 50); // Alphas are not working
+    public static final Color offWhite = new Color(222, 222, 222, 255);
+
     private final static String CHECKING_IMG_PATH = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/product/checking.png";
     private final static String CREDIT_CARD_IMG_PATH = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/product/credit.png";
     private final static String CARD_PROCESSING_IMG_PATH = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/product/card_process.png";
@@ -73,15 +78,145 @@ public class SbwTest {
     private final static String TOP_IMAGE_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/checkFalseBmd.png";
     private final static String BOTTOM_IMAGE_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/Darkgrey.jpg";
     private final static String KEY_LOGO_SMALL_IMAGE_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/key_logo.png";
-
-    private final static Object[][] DATA = new Object[][]{
-            {"Whisky", 134.0, 145.0},
-            {"Beer",   768.0, 677.0},
-            {"Gin",    456.2, 612.0},
-            {"Vodka",  302.3, 467.0}
-    };
+    private final static String KEY_OUR_SOLUTIONS_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/OurSolutions.png";
 
     private static int borderWidth = 0;
+
+    @Test
+    public void testImageBackgroundPdf() throws IOException {
+
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage(PDRectangle.A4);
+        document.addPage(page);
+
+        float initialStartY = page.getMediaBox().getHeight() - PADDING_Y;
+        float startY = initialStartY;
+
+        PDImageXObject solutionsImage = PDImageXObject.createFromFile(KEY_OUR_SOLUTIONS_URL, document);
+        solutionsImage.setHeight(270);
+
+        PDRectangle mediaBox = page.getMediaBox();
+        PDRectangle cropBox = page.getCropBox();
+
+        System.out.println("Media, width=" + mediaBox.getWidth() + ", height=" + mediaBox.getHeight()
+                + ", lowLeftX=" + mediaBox.getLowerLeftX() + ", lowLeftY=" + mediaBox.getLowerLeftY()
+                + ", upRightX=" + mediaBox.getUpperRightX() + ", upRightY=" + mediaBox.getUpperRightY()
+        );
+
+        System.out.println("Crop, width=" + cropBox.getWidth() + ", height=" + cropBox.getHeight()
+                + ", lowLeftX=" + cropBox.getLowerLeftX() + ", lowLeftY=" + cropBox.getLowerLeftY()
+                + ", upRightX=" + cropBox.getUpperRightX() + ", upRightY=" + cropBox.getUpperRightY()
+        );
+
+        //float width = mediaBox.getWidth() - 2 * PADDING_X;
+        float width = cropBox.getWidth();
+
+        final Table.TableBuilder tableImageBuilder = Table.builder()
+                .addColumnOfWidth(width);
+
+        ImageCell cellImage = ImageCell.builder()
+                .image(solutionsImage)
+                //.borderWidth(borderWidth)
+                .padding(0)
+                .width(width)
+                //.backgroundColor(WHITE)
+                //.textColor(keyRedBackground)
+                //.fontSize(16)
+                //.font(HELVETICA_BOLD)
+                //.borderWidthBottom(2f)
+                //.borderWidth(borderWidth)
+                .build();
+
+        tableImageBuilder.addRow(
+                Row.builder()
+                        .add(cellImage)
+                        .verticalAlignment(TOP)
+                        .build());
+        Table tableImage = tableImageBuilder.build();
+
+        final Table.TableBuilder tableTextBuilder = Table.builder()
+                .addColumnOfWidth(width);
+
+        TextCell textCell1 = TextCell.builder()
+                .text("Congratulations")
+                //.backgroundColor(WHITE)
+                .textColor(WHITE)
+                .horizontalAlignment(CENTER)
+                .fontSize(14)
+                .font(HELVETICA_BOLD)
+                .borderWidth(borderWidth)
+                .paddingTop(15f)
+                .build();
+
+        TextCell textCell2 = TextCell.builder()
+                .text("Potentially Long Company Name Inc.")
+                //.backgroundColor(WHITE)
+                .textColor(offWhite)
+                .horizontalAlignment(CENTER)
+                .fontSize(14)
+                .font(HELVETICA)
+                .borderWidth(borderWidth)
+                .paddingBottom(15f)
+                .build();
+
+        TextCell textCell3 = TextCell.builder()
+                .text("You're building a stringer financial future.")
+                //.backgroundColor(WHITE)
+                .textColor(offWhite)
+                .horizontalAlignment(CENTER)
+                .fontSize(12)
+                .font(HELVETICA)
+                .borderWidth(borderWidth)
+                .build();
+
+        TextCell textCell4 = TextCell.builder()
+                .text("Now let's complete the final steps in the process.")
+                //.backgroundColor(WHITE)
+                .textColor(offWhite)
+                .horizontalAlignment(CENTER)
+                .fontSize(12)
+                .font(HELVETICA)
+                .borderWidth(borderWidth)
+                .paddingBottom(10f)
+                .build();
+
+        tableTextBuilder.addRow(Row.builder().add(textCell1).build());
+        tableTextBuilder.addRow(Row.builder().add(textCell2).build());
+        tableTextBuilder.addRow(Row.builder().add(textCell3).build());
+        tableTextBuilder.addRow(Row.builder().add(textCell4).build());
+        tableTextBuilder.verticalAlignment(TOP);
+        Table tableText = tableTextBuilder.build();
+
+        System.out.println("tableImage.getHeight() = " + tableImage.getHeight());
+        System.out.println("tableText.getHeight() = " + tableText.getHeight());
+
+        try (final PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+
+            TableDrawer.builder()
+                    .page(page)
+                    .contentStream(contentStream)
+                    .table(tableImage)
+                    .startX(0)
+                    .startY(cropBox.getUpperRightY())
+                    .endY(0)
+                    .build()
+                    .draw(() -> document, () -> page, 0);
+
+            TableDrawer.builder()
+                    .page(page)
+                    .contentStream(contentStream)
+                    .table(tableText)
+                    .startX(0)
+                    .startY(0)
+                    .endY(0)
+                    .build()
+                    .draw(() -> document, () -> page, 0);
+
+            System.err.println("PAGE 04: " + page);
+        }
+        document.save("sbwImage-" + System.currentTimeMillis() + ".pdf");
+        document.close();
+    }
 
     @Test
     public void createSbwRecPdf() throws IOException {
@@ -94,10 +229,10 @@ public class SbwTest {
         document.addPage(page);
 
         System.err.println("PAGE 01: " + page);
-        PDDocumentOutline outline =  new PDDocumentOutline();
+        PDDocumentOutline outline = new PDDocumentOutline();
         document.getDocumentCatalog().setDocumentOutline(outline);
         PDOutlineItem pagesOutline = new PDOutlineItem();
-        pagesOutline.setTitle( "All Pages" );
+        pagesOutline.setTitle("All Pages");
         outline.addLast(pagesOutline);
         addPageBookMark(page, "Page " + pageNo, pagesOutline);
 
@@ -105,9 +240,8 @@ public class SbwTest {
         float startY = initialStartY;
         List<TableRec> tables = createRecTables(document, page, resDataList);
 
-        tables.add(0, createPageTitleTable(document, page));
-
-        PDImageXObject bottomImage1 = PDImageXObject.createFromFile(BOTTOM_IMAGE_URL, document);
+        tables.add(0, buildWellnessBanner(document, page));
+        tables.add(1, createPageTitleTable(document, page));
 
         PDRectangle mediaBox = page.getMediaBox();
         PDRectangle cropBox = page.getCropBox();
@@ -126,13 +260,17 @@ public class SbwTest {
 
             //contentStream.drawImage(bottomImage1, 0, 50, 700, 20);
 
+            float congratsoffsetY = drawCongratsTable(document, page, contentStream, 20f);
+            startY -= congratsoffsetY;
+
             boolean drawHeader = true;
             boolean drawFooter = true;
             for (int i = 0; i < tables.size(); i++) {
                 System.err.println("PAGE 02: " + page);
                 TableRec tableRec = tables.get(i);
 
-            //for (final Table table : tables) {
+                //for (final Table table : tables) {
+
                 float nextTableHeight = tableRec.getTable().getHeight();
                 System.err.println("M startY=" + startY + ", next table height=" + nextTableHeight + ", should create new page=" + (startY - nextTableHeight));
 
@@ -162,8 +300,8 @@ public class SbwTest {
                             .build()
                             .draw(() -> document, () -> new PDPage(PDRectangle.A4), PADDING_Y);
                     drawHeader = false;
-                //}
-                //if (drawFooter) {
+                    //}
+                    //if (drawFooter) {
                     TableDrawer.builder()
                             .page(page)
                             .contentStream(contentStream)
@@ -208,8 +346,8 @@ public class SbwTest {
             pagesOutline.openNode();
             outline.openNode();
 
-           // optional: show the outlines when opening the file
-           document.getDocumentCatalog().setPageMode(PageMode.USE_OUTLINES);
+            // optional: show the outlines when opening the file
+            document.getDocumentCatalog().setPageMode(PageMode.USE_OUTLINES);
         }
 
         //addPageNumbers(document, "Page {0}", 60, 18);
@@ -227,12 +365,119 @@ public class SbwTest {
         document.close();
     }
 
+    TableRec buildWellnessBanner(PDDocument document, PDPage page) {
+
+        Table.TableBuilder tableBuilder = Table.builder().addColumnOfWidth(page.getCropBox().getWidth() - 50);
+        TextCell tCell = TextCell.builder().text("Your Wellness Roadmap").font(HELVETICA).fontSize(20).textColor(WHITE).backgroundColor(keyRedBackground).verticalAlignment(MIDDLE).build();
+        Table tbl = tableBuilder.borderWidth(borderWidth).addRow(Row.builder().height(50f).add(tCell).build()).horizontalAlignment(CENTER).build();
+        return  new TableRec(tbl, null);
+    }
+
+    public float drawCongratsTable(PDDocument document, PDPage page, PDPageContentStream contentStream, float offsetY) throws IOException {
+
+        PDImageXObject solutionsImage = PDImageXObject.createFromFile(KEY_OUR_SOLUTIONS_URL, document);
+        solutionsImage.setHeight(270);
+        PDRectangle cropBox = page.getCropBox();
+        float width = cropBox.getWidth();
+
+        final Table.TableBuilder tableImageBuilder = Table.builder().addColumnOfWidth(width);
+
+        ImageCell cellImage = ImageCell.builder()
+                .image(solutionsImage)
+                .padding(0)
+                .width(width)
+                .build();
+
+        tableImageBuilder.addRow(
+                Row.builder().add(cellImage)
+                        .verticalAlignment(TOP)
+                        .build());
+        Table tableImage = tableImageBuilder.build();
+
+        final Table.TableBuilder tableTextBuilder = Table.builder().addColumnOfWidth(width);
+
+        TextCell textCell1 = TextCell.builder()
+                .text("Congratulations")
+                .textColor(WHITE)
+                .horizontalAlignment(CENTER)
+                .fontSize(14)
+                .font(HELVETICA_BOLD)
+                .borderWidth(borderWidth)
+                .paddingTop(15f)
+                .build();
+
+        TextCell textCell2 = TextCell.builder()
+                .text("Potentially Long Company Name Inc.")
+                //.backgroundColor(WHITE)
+                .textColor(offWhite)
+                .horizontalAlignment(CENTER)
+                .fontSize(14)
+                .font(HELVETICA)
+                .borderWidth(borderWidth)
+                .paddingBottom(15f)
+                .build();
+
+        TextCell textCell3 = TextCell.builder()
+                .text("You're building a stronger financial future.")
+                //.backgroundColor(WHITE)
+                .textColor(offWhite)
+                .horizontalAlignment(CENTER)
+                .fontSize(12)
+                .font(HELVETICA)
+                .borderWidth(borderWidth)
+                .build();
+
+        TextCell textCell4 = TextCell.builder()
+                .text("Now let's complete the final steps in the process.")
+                //.backgroundColor(WHITE)
+                .textColor(offWhite)
+                .horizontalAlignment(CENTER)
+                .fontSize(12)
+                .font(HELVETICA)
+                .borderWidth(borderWidth)
+                .paddingBottom(10f)
+                .build();
+
+        tableTextBuilder.addRow(Row.builder().add(textCell1).build());
+        tableTextBuilder.addRow(Row.builder().add(textCell2).build());
+        tableTextBuilder.addRow(Row.builder().add(textCell3).build());
+        tableTextBuilder.addRow(Row.builder().add(textCell4).build());
+        tableTextBuilder.verticalAlignment(TOP);
+        Table tableText = tableTextBuilder.build();
+
+        System.out.println("tableImage.getHeight() = " + tableImage.getHeight());
+        System.out.println("tableText.getHeight() = " + tableText.getHeight());
+
+        TableDrawer.builder()
+                .page(page)
+                .contentStream(contentStream)
+                .table(tableImage)
+                .startX(0)
+                .startY(cropBox.getUpperRightY() - offsetY)
+                .endY(0)
+                .build()
+                .draw(() -> document, () -> page, 0);
+
+        TableDrawer.builder()
+                .page(page)
+                .contentStream(contentStream)
+                .table(tableText)
+                .startX(0)
+                .startY(cropBox.getUpperRightY() - offsetY)
+                .endY(0)
+                .build()
+                .draw(() -> document, () -> page, 0);
+
+        System.err.println("PAGE 04: " + page);
+        return tableImage.getHeight();
+    }
+
     public static void addPageNumbers(PDDocument document, String numberingFormat, int offset_X, int offset_Y) throws IOException {
         int page_counter = 1;
         PDImageXObject bottomImage1 = PDImageXObject.createFromFile(BOTTOM_IMAGE_URL, document);
         PDPageContentStream contentStream = null;
 
-        for(PDPage page : document.getPages()){
+        for (PDPage page : document.getPages()) {
             contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true, true);
 
             contentStream.drawImage(bottomImage1, 0, 50, 700, 20);
@@ -243,8 +488,8 @@ public class SbwTest {
             PDRectangle pageSize = page.getCropBox();
             float x = pageSize.getLowerLeftX();
             float y = pageSize.getLowerLeftY();
-            contentStream.newLineAtOffset(x+ pageSize.getWidth()-offset_X, y+offset_Y);
-            String text = MessageFormat.format(numberingFormat,page_counter);
+            contentStream.newLineAtOffset(x + pageSize.getWidth() - offset_X, y + offset_Y);
+            String text = MessageFormat.format(numberingFormat, page_counter);
             contentStream.showText(text);
             contentStream.endText();
             ++page_counter;
@@ -300,17 +545,17 @@ public class SbwTest {
 
     private void addPageBookMark(PDPage page, String title, PDOutlineItem pagesOutline) {
         PDPageDestination dest = new PDPageFitWidthDestination();
-       // If you want to have several bookmarks pointing to different areas
-       // on the same page, have a look at the other classes derived from PDPageDestination.
+        // If you want to have several bookmarks pointing to different areas
+        // on the same page, have a look at the other classes derived from PDPageDestination.
 
         PDPageXYZDestination x = new PDPageXYZDestination();
         x.setPage(page);
 
-       dest.setPage( page );
-       PDOutlineItem bookmark = new PDOutlineItem();
-       bookmark.setDestination( dest );
-       bookmark.setTitle(title);
-       pagesOutline.addLast( bookmark );
+        dest.setPage(page);
+        PDOutlineItem bookmark = new PDOutlineItem();
+        bookmark.setDestination(dest);
+        bookmark.setTitle(title);
+        pagesOutline.addLast(bookmark);
     }
 
     private void addRecBookMark(PDPage page, String title, PDOutlineItem pagesOutline, float startY) {
@@ -324,7 +569,7 @@ public class SbwTest {
 
         dest.setPage(page);
         dest.setLeft(0);
-        dest.setTop((int)startY);
+        dest.setTop((int) startY);
         dest.setZoom(-1);
         PDOutlineItem bookmark = new PDOutlineItem();
         bookmark.setDestination(dest);
@@ -359,7 +604,7 @@ public class SbwTest {
         rows.add(createRecTitleRow(document, page, recData));
         rows.add(createRecSubTitleRow(document, page, recData));
 
-        for(RecCheckedItem item : recData.getItems()) {
+        for (RecCheckedItem item : recData.getItems()) {
             rows.add(createRecItemRow(document, page, item));
         }
 
@@ -378,11 +623,11 @@ public class SbwTest {
         PDRectangle mediaBox = page.getMediaBox();
         float width = mediaBox.getWidth();
 
-        Color bkgrnd = new Color(164, 0, 0);
+        //Color bkgrnd = new Color(164, 0, 0);
         //Color bkgrnd = RED;
 
         final Table.TableBuilder tableHeaderBuilder = Table.builder()
-                .backgroundColor(bkgrnd)
+                .backgroundColor(keyRedBackground)
                 .textColor(WHITE)
                 .font(HELVETICA)
                 .fontSize(9)
@@ -404,7 +649,7 @@ public class SbwTest {
 
         TextCell headerTitleCell2 = TextCell.builder()
                 .text("Created for A Long Company Name That Should Fit Here")
-                .backgroundColor(bkgrnd)
+                .backgroundColor(keyRedBackground)
                 //.textColor(WHITE)
                 //.fontSize(9)
                 //.font(HELVETICA)
@@ -434,7 +679,7 @@ public class SbwTest {
 
         tableHeaderBuilder.addRow(
                 Row.builder()
-                        .backgroundColor(bkgrnd)
+                        .backgroundColor(keyRedBackground)
                         .height(20f)
                         .add(headerTitleCell1)
                         .add(headerTitleCell2)
@@ -502,8 +747,8 @@ public class SbwTest {
         TextCell headerTitleCell = TextCell.builder()
                 .text("Grow Your Business Today")
                 .backgroundColor(WHITE)
-                .textColor(Color.RED)
-                .fontSize(18)
+                .textColor(keyRedBackground)
+                .fontSize(16)
                 .font(HELVETICA_BOLD)
                 .borderWidthBottom(2f)
                 .borderWidth(borderWidth)
@@ -567,36 +812,63 @@ public class SbwTest {
         rowCnt += recData.getItems().size();
 
         return Row.builder()
-            .add(ImageCell.builder()
-                    .image(PDImageXObject.createFromFile(recData.getImagePath(), document))
-                    .rowSpan(rowCnt)
-                    .verticalAlignment(TOP)
-                    .build())
-            .add(TextCell.builder()
-                    .borderWidth(borderWidth)
-                    .padding(6)
-                    .text(recData.getTitle())
-                    .fontSize(16)
-                    .font(HELVETICA_BOLD)
-                    .colSpan(2)
-                    .verticalAlignment(TOP)
-                    .paddingBottom(2f)
-                    .minHeight(30)
-                    .build())
-            .backgroundColor(WHITE)
-            .textColor(BLACK)
-            .font(HELVETICA_BOLD)
-            .fontSize(8)
-            .horizontalAlignment(LEFT)
-            .build();
+                .add(ImageCell.builder()
+                        .image(PDImageXObject.createFromFile(recData.getImagePath(), document))
+                        .rowSpan(rowCnt)
+                        .verticalAlignment(TOP)
+                        .build())
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        .padding(6)
+                        .text(recData.getTitle())
+                        .fontSize(16)
+                        .font(HELVETICA_BOLD)
+                        .colSpan(2)
+                        .verticalAlignment(TOP)
+                        .paddingBottom(2f)
+                        .minHeight(30)
+                        .build())
+                .backgroundColor(WHITE)
+                .textColor(BLACK)
+                .font(HELVETICA_BOLD)
+                .fontSize(8)
+                .horizontalAlignment(LEFT)
+                .build();
     }
 
     private Row createRecSubTitleRow(PDDocument document, PDPage page, RecommendationData recData) throws IOException {
         if (recData.getSubTitle() == null) {
             return null;
         }
+        TextCell tCell = TextCell.builder().borderWidth(borderWidth).padding(6).text(recData.getSubTitle()).fontSize(12).font(HELVETICA_BOLD).colSpan(2).borderWidth(borderWidth).build();
+        //return Row.builder()
+        //        .add(TextCell.builder().borderWidth(0).padding(6).text(recData.getSubTitle()).fontSize(12).font(HELVETICA_BOLD).colSpan(2).borderWidth(borderWidth).build())
+        //        .backgroundColor(WHITE)
+        //        .textColor(BLACK)
+        //        .horizontalAlignment(LEFT)
+        //        .verticalAlignment(MIDDLE)
+        //        .build();
+
+        ParagraphCell pCell = ParagraphCell.builder()
+                .borderWidth(borderWidth)
+                .padding(6)
+                .lineSpacing(1.0f)
+                .colSpan(2)
+                .borderWidth(borderWidth)
+                .horizontalAlignment(LEFT)
+                .verticalAlignment(MIDDLE)
+                .paragraph(ParagraphCell.Paragraph.builder()
+                        //.append(StyledText.builder().text("This is some text in one font.").font(HELVETICA).build())
+                        //.appendNewLine()
+                        .append(StyledText.builder().text("Sign up for ").font(HELVETICA).fontSize(12f). build())
+                        .append(Hyperlink.builder().text("KeyBank Online Banking").url("http://www.key.com").font(HELVETICA_OBLIQUE).fontSize(12f).color(BLUE).build())
+                        //.appendNewLine(6f)
+                        //.append(StyledText.builder().text("There was the link. And now we are using the default font from the cell.").build())
+                        .build())
+                .build();
+
         return Row.builder()
-                .add(TextCell.builder().borderWidth(0).padding(6).text(recData.getSubTitle()).fontSize(12).font(HELVETICA_BOLD).colSpan(2).borderWidth(borderWidth).build())
+                .add(pCell)
                 .backgroundColor(WHITE)
                 .textColor(BLACK)
                 .horizontalAlignment(LEFT)
@@ -772,62 +1044,62 @@ public class SbwTest {
 
     private Row create3rdDataRow() {
         return Row.builder()
-            .add(TextCell.builder()
-                    .borderWidth(1)
-                    .text("Gray Again")
-                    .colSpan(2)
-                    .backgroundColor(GRAY_LIGHT_2)
-                    .build())
-            .build();
+                .add(TextCell.builder()
+                        .borderWidth(1)
+                        .text("Gray Again")
+                        .colSpan(2)
+                        .backgroundColor(GRAY_LIGHT_2)
+                        .build())
+                .build();
     }
 
     private Row create4thDataRow() {
         return Row.builder()
-            .add(TextCell.builder()
-                    .borderWidth(1)
-                    .text("And Darker Gray")
-                    .colSpan(2)
-                    .backgroundColor(GRAY_LIGHT_3)
-                    .build())
-            .build();
+                .add(TextCell.builder()
+                        .borderWidth(1)
+                        .text("And Darker Gray")
+                        .colSpan(2)
+                        .backgroundColor(GRAY_LIGHT_3)
+                        .build())
+                .build();
     }
 
     private Row create5thDataRow() {
         return Row.builder()
-            .add(TextCell.builder()
-                    .borderWidth(1)
-                    .text("Right!")
-                    .rowSpan(2)
-                    .backgroundColor(GRAY_LIGHT_2)
-                    .build())
-            .add(TextCell.builder()
-                    .borderWidth(1)
-                    .text("Aligned!")
-                    .horizontalAlignment(RIGHT)
-                    .backgroundColor(GRAY_LIGHT_2)
-                    .build())
-            .build();
+                .add(TextCell.builder()
+                        .borderWidth(1)
+                        .text("Right!")
+                        .rowSpan(2)
+                        .backgroundColor(GRAY_LIGHT_2)
+                        .build())
+                .add(TextCell.builder()
+                        .borderWidth(1)
+                        .text("Aligned!")
+                        .horizontalAlignment(RIGHT)
+                        .backgroundColor(GRAY_LIGHT_2)
+                        .build())
+                .build();
     }
 
     private Row create6thDataRow() {
         return Row.builder()
-            .add(TextCell.builder()
-                    .borderWidth(1)
-                    .text("Left.")
-                    .backgroundColor(GRAY_LIGHT_3)
-                    .build())
-            .build();
+                .add(TextCell.builder()
+                        .borderWidth(1)
+                        .text("Left.")
+                        .backgroundColor(GRAY_LIGHT_3)
+                        .build())
+                .build();
     }
 
     private Row create7thDataRow() {
         return Row.builder()
-            .add(TextCell.builder()
-                    .borderWidth(1)
-                    .text("Here some text.")
-                    .backgroundColor(GRAY_LIGHT_2)
-                    .colSpan(3)
-                    .build())
-            .build();
+                .add(TextCell.builder()
+                        .borderWidth(1)
+                        .text("Here some text.")
+                        .backgroundColor(GRAY_LIGHT_2)
+                        .colSpan(3)
+                        .build())
+                .build();
     }
 
     private Row create8thDataRow() throws IOException {
@@ -845,37 +1117,37 @@ public class SbwTest {
 
     private Row create9thDataRow() {
         return Row.builder()
-        .add(TextCell.builder().borderWidth(1).text("Bit Lighter.").colSpan(2).backgroundColor(GRAY_LIGHT_2).build())
-        .build();
+                .add(TextCell.builder().borderWidth(1).text("Bit Lighter.").colSpan(2).backgroundColor(GRAY_LIGHT_2).build())
+                .build();
     }
 
     private Row create10thDataRow() {
         return Row.builder()
-        .add(TextCell.builder().borderWidth(1).text("Well. Actually not.").colSpan(2).backgroundColor(GRAY_LIGHT_3).build())
-        .build();
+                .add(TextCell.builder().borderWidth(1).text("Well. Actually not.").colSpan(2).backgroundColor(GRAY_LIGHT_3).build())
+                .build();
     }
 
     private Row create11thDataRow() {
         return Row.builder().add(TextCell.builder().borderWidth(1).text("Now.").colSpan(2).backgroundColor(GRAY_LIGHT_2).build())
-        .build();
+                .build();
     }
 
     private Row create12thDataRow() {
         return Row.builder().add(TextCell.builder().borderWidth(1).text("Yeah.").rowSpan(2).backgroundColor(GRAY_LIGHT_3).build())
-        .add(TextCell.builder().borderWidth(1).text("This and ...")
-                .horizontalAlignment(RIGHT)
-                .backgroundColor(GRAY_LIGHT_3)
-                .build())
-        .build();
+                .add(TextCell.builder().borderWidth(1).text("This and ...")
+                        .horizontalAlignment(RIGHT)
+                        .backgroundColor(GRAY_LIGHT_3)
+                        .build())
+                .build();
     }
 
     private Row create13thDataRow() {
         return Row.builder()
-        .add(TextCell.builder().borderWidth(1).text("... that: right aligned!")
-                .backgroundColor(GRAY_LIGHT_2)
-                .horizontalAlignment(RIGHT)
-                .build())
-        .build();
+                .add(TextCell.builder().borderWidth(1).text("... that: right aligned!")
+                        .backgroundColor(GRAY_LIGHT_2)
+                        .horizontalAlignment(RIGHT)
+                        .build())
+                .build();
     }
 
     private Row create14thDataRow() {

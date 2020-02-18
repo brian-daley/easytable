@@ -9,6 +9,7 @@ import org.vandeseer.easytable.structure.Row;
 import org.vandeseer.easytable.structure.Table;
 import org.vandeseer.easytable.structure.cell.ImageCell;
 import org.vandeseer.easytable.structure.cell.TextCell;
+import org.vandeseer.easytable.structure.cell.paragraph.ParagraphCell;
 
 import static org.vandeseer.easytable.settings.HorizontalAlignment.RIGHT;
 

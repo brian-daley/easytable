@@ -155,5 +155,4 @@ public class ParagraphCellTest {
                 .append(StyledText.builder().text("COLOR!").color(Color.RED).font(COURIER_BOLD_OBLIQUE).build())
                 .build();
     }
-
 }
