@@ -3,7 +3,6 @@ package org.vandeseer.integrationtest;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.WHITE;
-import static org.apache.pdfbox.pdmodel.font.PDType1Font.COURIER_BOLD;
 import static org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA;
 import static org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA_BOLD;
 import static org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA_OBLIQUE;
@@ -20,6 +19,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -73,12 +73,17 @@ public class SbwTest {
     private final static String CARD_PROCESSING_IMG_PATH = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/product/card_process.png";
     private final static String SAVINGS_IMG_PATH = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/product/saving_account.png";
     private final static String LOAN_IMG_PATH = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/product/business_loan.png";
-    private final static String CHECKBOX_TRUE = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/checkTrueBmd.png";
+    private final static String CHECKBOX_TRUE = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/checkTrueBlue.png";
+    //private final static String CHECKBOX_TRUE = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/checkTrueBmd.png";
     private final static String CHECKBOX_FALSE = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/checkFalseBmd.png";
     private final static String TOP_IMAGE_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/checkFalseBmd.png";
     private final static String BOTTOM_IMAGE_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/Darkgrey.jpg";
     private final static String KEY_LOGO_SMALL_IMAGE_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/key_logo.png";
     private final static String KEY_OUR_SOLUTIONS_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/OurSolutions.png";
+    private final static String DIVIDER_BLK_1PX_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/DividerBlack1px.png";
+    private final static String DIVIDER_BLK_2PX_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/DividerBlack2px.png";
+    private final static String TRANSPARENT_1X1_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/DividerBlack2px.png";
+    private final static String WHITE_1X1_URL = "/Users/daleyb2/Repos/easytable/src/main/resources/assets/DividerBlack2px.png";
 
     private static int borderWidth = 0;
 
@@ -228,6 +233,11 @@ public class SbwTest {
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
 
+        // Users/daleyb2/fonts/fontawesome-free-5.12.1-web/webfonts/fa-regular-400.ttf
+        // /Users/daleyb2/fonts/fontawesome-free-5.12.1-web/webfonts/fa-solid-900.ttf
+        // check-square
+        // PDFont font = PDType0Font.load(document,new File("/Users/daleyb2/fonts/fontawesome-free-5.12.1-web/webfonts/fa-regular-400.ttf"));
+
         System.err.println("PAGE 01: " + page);
         PDDocumentOutline outline = new PDDocumentOutline();
         document.getDocumentCatalog().setDocumentOutline(outline);
@@ -242,6 +252,7 @@ public class SbwTest {
 
         tables.add(0, buildWellnessBanner(document, page));
         tables.add(1, createPageTitleTable(document, page));
+        tables.add(buildThreeColumnTableWithHeader(document, page));
 
         PDRectangle mediaBox = page.getMediaBox();
         PDRectangle cropBox = page.getCropBox();
@@ -329,6 +340,22 @@ public class SbwTest {
                 startY -= (tableRec.getTable().getHeight() + PADDING_Y_BETWEEN_TABLES);
                 System.err.println("PAGE 04: " + page);
             }
+
+            // TODO: Start new page
+            //PDPage page2 = new PDPage(PDRectangle.A4);
+            //document.addPage(page2);
+            //
+            //TableDrawer.builder()
+            //        .page(page)
+            //        .contentStream(contentStream)
+            //        .table(tableRec.getTable())
+            //        .startX(PADDING_X)
+            //        .startY(startY)
+            //        .endY(PADDING_Y)
+            //        .build()
+            //        .draw(() -> document, () -> new PDPage(PDRectangle.A4), PADDING_Y);
+
+
             //if (drawFooter) {
             //    Table hdrTbl = createPageHeaderTable(document, page, pageNo).getTable();
             //    TableDrawer.builder()
@@ -348,6 +375,7 @@ public class SbwTest {
 
             // optional: show the outlines when opening the file
             document.getDocumentCatalog().setPageMode(PageMode.USE_OUTLINES);
+
         }
 
         //addPageNumbers(document, "Page {0}", 60, 18);
@@ -365,12 +393,470 @@ public class SbwTest {
         document.close();
     }
 
+    TableRec buildThreeColumnTableWithHeader(PDDocument document, PDPage page) throws IOException {
+
+        PDRectangle mediaBox = page.getMediaBox();
+        float width = mediaBox.getWidth() - 2 * PADDING_X;
+        //float bulletWidth = 10f;
+        //float widthMinusBullets = width - 3 * bulletWidth;
+        float widthCol1 = width * .33f;
+        float widthCol2 = width * .33f;
+        float widthCol3 = width * .33f;
+        int colCnt = 3;
+        List<Row> rows = new ArrayList<>();
+
+        Table.TableBuilder tableBuilder = Table.builder()
+                .addColumnsOfWidth(widthCol1, widthCol2, widthCol3)
+                .borderColor(BLACK)
+                .borderWidth(borderWidth)
+                .textColor(BLACK)
+                .fontSize(8)
+                .font(HELVETICA);
+
+        //rows.add(createRecTitleRow(document, page, recData));
+        //rows.add(createRecSubTitleRow(document, page, recData));
+        //
+        //for (RecCheckedItem item : recData.getItems()) {
+        //    rows.add(createRecItemRow(document, page, item));
+        //}
+        //
+        //for (Row row : rows) {
+        //    if (row != null) {
+        //        tblBldr.addRow(row);
+        //    }
+        //}
+        //TableRec tableRec = new TableRec(tblBldr.build(), recData.getTitle());
+        //return tableRec;
+
+        //Table.TableBuilder tableBuilder = Table.builder().addColumnOfWidth(page.getCropBox().getWidth() - 50);
+        //TextCell tCell = TextCell.builder().text("Your Wellness Roadmap").font(HELVETICA).fontSize(20).textColor(WHITE).backgroundColor(keyRedBackground).verticalAlignment
+        // (MIDDLE).build();
+        //Table tbl = tableBuilder.borderWidth(borderWidth).addRow(Row.builder().height(50f).add(tCell).build()).horizontalAlignment(CENTER).build();
+
+        // A title row is required, no check necessary
+        int rowCnt = 1;
+
+        // TODO: Find out table vs Row vs Cell text color, font, color... which one to set?
+        Row row = Row.builder()
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        .colSpan(colCnt)
+                        .padding(6)
+                        .text("Solutions for Funding")
+                        .fontSize(16)
+                        .font(HELVETICA_BOLD)
+                        .verticalAlignment(MIDDLE)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .backgroundColor(WHITE)
+                .textColor(BLACK)
+                .font(HELVETICA_BOLD)
+                .horizontalAlignment(LEFT)
+                .build();
+        tableBuilder.addRow(row);
+
+        row = Row.builder()
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        .colSpan(colCnt)
+                        .padding(6)
+                        .text("Dental Practices")
+                        .fontSize(16)
+                        .font(HELVETICA_BOLD)
+                        .verticalAlignment(MIDDLE)
+                        .paddingBottom(4f)
+                        //.minHeight(30)
+                        .build())
+                .backgroundColor(WHITE)
+                .textColor(BLACK)
+                .font(HELVETICA_BOLD)
+                .horizontalAlignment(LEFT)
+                .build();
+        tableBuilder.addRow(row);
+
+        row = Row.builder()
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        .colSpan(colCnt)
+                        .padding(6)
+                        .text("Because you have a high level of transactions, the desire to make and track purchases, a business in an industry that often invests reserve funds," +
+                                " employees who can benefit from financial wellness programs, 10 or more employees, and the need to take payment via credit or debit card, we " +
+                                "recommend the following:")
+                        .fontSize(10)
+                        .font(HELVETICA)
+                        .verticalAlignment(TOP)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .backgroundColor(WHITE)
+                .textColor(BLACK)
+                .font(HELVETICA_BOLD)
+                .horizontalAlignment(LEFT)
+                .build();
+        tableBuilder.addRow(row);
+
+        //
+        PDImageXObject divider = PDImageXObject.createFromFile(TRANSPARENT_1X1_URL, document);
+        divider.setHeight(1);
+
+        row = Row.builder()
+                .add(ImageCell.builder()
+                        .image(divider)
+                        .padding(0)
+                        .paddingBottom(12f)
+                        //.verticalAlignment(BOTTOM)
+                        .borderColor(BLACK)
+                        .borderWidth(0)
+                        .borderWidthBottom(1)
+                        .colSpan(colCnt)
+                        .build())
+                //.height(10f)
+                //.textColor(BLACK)
+                //.font(HELVETICA_BOLD)
+                //.horizontalAlignment(LEFT)
+                .build();
+        tableBuilder.addRow(row);
+
+        row = Row.builder()
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        //.colSpan(2)
+                        .padding(1)
+                        .paddingTop(16)
+                        .text("Business Reward Checking®")
+                        .fontSize(12)
+                        .font(HELVETICA_BOLD)
+                        .horizontalAlignment(CENTER)
+                        .verticalAlignment(MIDDLE)
+                        .textColor(keyRedBackground)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        //.colSpan(2)
+                        .padding(1)
+                        .text("Card Processing")
+                        .fontSize(12)
+                        .font(HELVETICA_BOLD)
+                        .horizontalAlignment(CENTER)
+                        .verticalAlignment(MIDDLE)
+                        .textColor(keyRedBackground)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        //.colSpan(2)
+                        .padding(1)
+                        .text("Cash Management")
+                        .fontSize(12)
+                        .font(HELVETICA_BOLD)
+                        .horizontalAlignment(CENTER)
+                        .verticalAlignment(MIDDLE)
+                        .textColor(keyRedBackground)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .backgroundColor(WHITE)
+                .textColor(BLACK)
+                .font(HELVETICA_BOLD)
+                .horizontalAlignment(CENTER)
+                .build();
+        tableBuilder.addRow(row);
+
+        //String text1 = "\nAlso, you can do all that indentation stuff much easier with markup, e.g. simple indentation\n"
+        //        + "--At vero eos et accusam\n\n"
+        //        + "-!And end the indentation. Now a list:\n"
+        //        + "--{0pt}This is a list item with 0 indent, I wonder what happens if I make this string longer?\n"
+        //        + "-+{4pt}Another list item, I wonder what happens if I make this string longer?\n"
+        //        + " -+A sub list item, I wonder what happens if I make this string longer?\n"
+        //        + "-+And yet another one, I wonder what happens if I make this string longer?\n\n"
+        //        + "-!Even enumeration is supported:\n"
+        //        + "-#This is a list item, I wonder what happens if I make this string longer?\n"
+        //        + "-#Another list item, I wonder what happens if I make this string longer?\n"
+        //        + " -#{a:}A sub list item, I wonder what happens if I make this string longer?\n"
+        //        + "-#And yet another one, I wonder what happens if I make this string longer?\n\n"
+        //        + "-!And you can customize it:, I wonder what happens if I make this string longer?\n"
+        //        + "-#{I ->:5}This is a list item, I wonder what happens if I make this string longer?\n"
+        //        + "-#{I ->:5}Another list item, I wonder what happens if I make this string longer?\n"
+        //        + " -#{a ~:30pt}A sub list item, I wonder what happens if I make this string longer?\n"
+        //        + "-#{I ->:5}And yet another one, I wonder what happens if I make this string longer?\n\n";
+
+        String text1 =
+                "-+{:0em}This is a list item with 1 indent, I wonder what happens if I make this string longer?\n"
+                        + "-+{:0em}Another list item 0 indent, I wonder what happens if I make this string longer?\n"
+                        + " -+A sub list item default indent, I wonder what happens if I make this string longer?\n"
+                        + "-+And yet another one, I wonder what happens if I make this string longer?\n\n"
+                        + "-!Even enumeration is supported:\n"
+                        + "-#This is a list item, I wonder what happens if I make this string longer?\n"
+                        + "-#Another list item, I wonder what happens if I make this string longer?\n"
+                        + " -#{a:}A sub list item, I wonder what happens if I make this string longer?\n"
+                        + "-#And yet another one, I wonder what happens if I make this string longer?\n\n"
+                        + "-!And you can customize it:, I wonder what happens if I make this string longer?\n"
+                        + "-#{I ->:5}This is a list item, I wonder what happens if I make this string longer?\n"
+                        + "-#{I ->:5}Another list item, I wonder what happens if I make this string longer?\n"
+                        + " -#{a ~:30pt}A sub list item, I wonder what happens if I make this string longer?\n"
+                        + "-#{I ->:5}And yet another one, I wonder what happens if I make this string longer?\n\n";
+
+        ParagraphCell markupTest = ParagraphCell.builder()
+                .borderWidth(borderWidth)
+                .padding(1)
+                //.colSpan(2)
+                .lineSpacing(1.0f)
+                .horizontalAlignment(LEFT)
+                .font(HELVETICA)
+                .fontSize(8)
+                .paragraph(ParagraphCell.Paragraph.builder()
+                        .append(Markup.builder()
+                                .markup(text1)
+                                .font(Markup.MarkupSupportedFont.HELVETICA)
+                                .build())
+                        .build()).build();
+        //
+        //
+        //paragraph.addMarkup(text1, 11, BaseFont.Times);
+        //document.add(paragraph);
+
+        row = Row.builder()
+                //.add(markupTest)
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        //.colSpan(2)
+                        .padding(2)
+                        .paddingBottom(6)
+                        .text("An account that can handle greater monthly account activity and track your money flow.")
+                        .fontSize(8)
+                        .font(HELVETICA_BOLD)
+                        .horizontalAlignment(LEFT)
+                        .verticalAlignment(MIDDLE)
+                        .textColor(BLACK)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        //.colSpan(2)
+                        .padding(1)
+                        .paddingBottom(6)
+                        .text("A credit card to help flex expenses and earn cash back on purchases")
+                        .fontSize(8)
+                        .font(HELVETICA_BOLD)
+                        .horizontalAlignment(LEFT)
+                        .verticalAlignment(MIDDLE)
+                        .textColor(BLACK)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        //.colSpan(2)
+                        .padding(1)
+                        .paddingBottom(6)
+                        .text("An easy way to process customer credit and debit cards")
+                        .fontSize(8)
+                        .font(HELVETICA_BOLD)
+                        .horizontalAlignment(LEFT)
+                        .verticalAlignment(MIDDLE)
+                        .textColor(BLACK)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .backgroundColor(WHITE)
+                .textColor(BLACK)
+                .font(HELVETICA_BOLD)
+                .horizontalAlignment(CENTER)
+                .build();
+        tableBuilder.addRow(row);
+
+        // Padding
+        row = Row.builder()
+                .add(TextCell.builder()
+                        .borderWidth(borderWidth)
+                        .colSpan(colCnt)
+                        .padding(1)
+                        .text("")
+                        .fontSize(6)
+                        .font(HELVETICA)
+                        .horizontalAlignment(LEFT)
+                        .verticalAlignment(MIDDLE)
+                        .textColor(WHITE)
+                        //.paddingBottom(2f)
+                        //.minHeight(30)
+                        .build())
+                .backgroundColor(WHITE)
+                .textColor(BLACK)
+                .font(HELVETICA)
+                .horizontalAlignment(CENTER)
+                .build();
+        tableBuilder.addRow(row);
+
+        // 1st row with bullets
+        row = Row.builder()
+                .add(getBulletPoints(
+                        "Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one.",
+                        "Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2.",
+                        "Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3"))
+                .add(getBulletPoints(
+                        "Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one.",
+                        "Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2."))
+                .add(getBulletPoints(
+                        "Bullet column one, Bullet column one, Bullet column one.",
+                        "Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2.",
+                        "Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3"))
+
+                ////.add(getBulletCell())
+                //.add(getBulletTextCell("Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one."))
+                ////.add(getBulletCell())
+                //.add(getBulletTextCell("Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2."))
+                ////.add(getBulletCell())
+                //.add(getBulletTextCell("Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3"))
+                //.backgroundColor(WHITE)
+                //.textColor(BLACK)
+                //.font(HELVETICA_BOLD)
+                //.horizontalAlignment(CENTER)
+                .build();
+        tableBuilder.addRow(row);
+
+        //row = Row.builder()
+        //        //.add(getBulletCell())
+        //        .add(getBulletTextCell("Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one."))
+        //        //.add(getBulletCell())
+        //        .add(getBulletTextCell("Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2."))
+        //        //.add(getBulletCell())
+        //        .add(getBulletTextCell("Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3"))
+        //        .backgroundColor(WHITE)
+        //        .textColor(BLACK)
+        //        //.font(HELVETICA_BOLD)
+        //        //.horizontalAlignment(CENTER)
+        //        .build();
+        //tableBuilder.addRow(row);
+        //
+        //row = Row.builder()
+        //        //.add(getBulletCell())
+        //        .add(getBulletTextCell("Bullet column one, Bullet column one, Bullet column one, Bullet column one, Bullet column one."))
+        //        //.add(getBulletCell())
+        //        .add(getBulletTextCell("Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2, Bullet column 2."))
+        //        //.add(getBulletCell())
+        //        .add(getBulletTextCell("Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3, Bullet column 3"))
+        //        .backgroundColor(WHITE)
+        //        .textColor(BLACK)
+        //        //.font(HELVETICA_BOLD)
+        //        //.horizontalAlignment(CENTER)
+        //        .build();
+        //tableBuilder.addRow(row);
+
+        Table tbl = tableBuilder.borderWidth(borderWidth).build();
+
+        return new TableRec(tbl, null);
+    }
+
+    private ParagraphCell getBulletPoints(String... list) {
+        String text1 =
+                "-+{:0em}This is a list item with 1 indent, I wonder what happens if I make this string longer?\n"
+                        + "-+{:0em}Another list item 0 indent, I wonder what happens if I make this string longer?\n"
+                        + " -+A sub list item default indent, I wonder what happens if I make this string longer?\n"
+                        + "-+And yet another one, I wonder what happens if I make this string longer?\n\n"
+                        + "-!Even enumeration is supported:\n"
+                        + "-#This is a list item, I wonder what happens if I make this string longer?\n"
+                        + "-#Another list item, I wonder what happens if I make this string longer?\n"
+                        + " -#{a:}A sub list item, I wonder what happens if I make this string longer?\n"
+                        + "-#And yet another one, I wonder what happens if I make this string longer?\n\n"
+                        + "-!And you can customize it:, I wonder what happens if I make this string longer?\n"
+                        + "-#{I ->:5}This is a list item, I wonder what happens if I make this string longer?\n"
+                        + "-#{I ->:5}Another list item, I wonder what happens if I make this string longer?\n"
+                        + " -#{a ~:30pt}A sub list item, I wonder what happens if I make this string longer?\n"
+                        + "-#{I ->:5}And yet another one, I wonder what happens if I make this string longer?\n\n";
+
+        final String bulletPrefix = "-+{:0em}";
+
+        StringBuilder sb = new StringBuilder();
+        List<Markup> markups = new ArrayList<>();
+        Markup markupBld = null;
+
+        for (String s : list) {
+            markupBld = Markup.builder()
+                    .markup("-+{:0em}" + s + "\n")
+                    .font(Markup.MarkupSupportedFont.HELVETICA)
+                    .build();
+            markups.add(markupBld);
+        }
+
+        //Markup markupBld = Markup.builder()
+        //        .markup("-+{:0em}Line 1, This is a list item with 1 indent, I wonder what happens if I make this string longer?\n")
+        //        .font(Markup.MarkupSupportedFont.HELVETICA)
+        //        .build();
+        //Markup markupBld2 = Markup.builder()
+        //        .markup("-+{:0em}Line 2, I wonder what happens if I make this string longer?\n")
+        //        .font(Markup.MarkupSupportedFont.HELVETICA)
+        //        .build();
+
+        ParagraphCell.Paragraph.ParagraphBuilder paragraphBuilder = ParagraphCell.Paragraph.builder();
+
+        Iterator<Markup> itor = markups.iterator();
+        while (itor.hasNext()) {
+            paragraphBuilder.append(itor.next());
+            if (itor.hasNext()) {
+                paragraphBuilder.appendNewLine(0.5f);
+            }
+        }
+        ParagraphCell.Paragraph paragraphCell = paragraphBuilder
+                .build();
+
+        ParagraphCell markupTest = ParagraphCell.builder()
+                .borderWidth(borderWidth)
+                .padding(4)
+                //.colSpan(2)
+                .lineSpacing(1.0f)
+                .horizontalAlignment(LEFT)
+                .font(HELVETICA)
+                .fontSize(8)
+                .paragraph(paragraphCell).build();
+        return markupTest;
+    }
+
+
+    private TextCell getBulletTextCell(String text) {
+        return TextCell.builder()
+                .borderWidth(borderWidth)
+                //.colSpan(2)
+                .padding(1)
+                .paddingBottom(8)
+                .text(text)
+                .fontSize(8)
+                .font(HELVETICA)
+                .horizontalAlignment(LEFT)
+                .verticalAlignment(TOP)
+                .textColor(BLACK)
+                //.paddingBottom(2f)
+                //.minHeight(30)
+                .build();
+    }
+
+    private TextCell getBulletCell() {
+        return TextCell.builder()
+                .borderWidth(borderWidth)
+                //.colSpan(1)
+                .padding(0)
+                .text("•")
+                .fontSize(14)
+                .font(HELVETICA_BOLD)
+                .horizontalAlignment(CENTER)
+                .verticalAlignment(TOP)
+                .textColor(BLACK)
+                //.paddingBottom(2f)
+                //.minHeight(30)
+                .build();
+    }
+
     TableRec buildWellnessBanner(PDDocument document, PDPage page) {
 
         Table.TableBuilder tableBuilder = Table.builder().addColumnOfWidth(page.getCropBox().getWidth() - 50);
-        TextCell tCell = TextCell.builder().text("Your Wellness Roadmap").font(HELVETICA).fontSize(20).textColor(WHITE).backgroundColor(keyRedBackground).verticalAlignment(MIDDLE).build();
+        TextCell tCell =
+                TextCell.builder().text("Your Wellness Roadmap").font(HELVETICA).fontSize(20).textColor(WHITE).backgroundColor(keyRedBackground).verticalAlignment(MIDDLE).build();
         Table tbl = tableBuilder.borderWidth(borderWidth).addRow(Row.builder().height(50f).add(tCell).build()).horizontalAlignment(CENTER).build();
-        return  new TableRec(tbl, null);
+        return new TableRec(tbl, null);
     }
 
     public float drawCongratsTable(PDDocument document, PDPage page, PDPageContentStream contentStream, float offsetY) throws IOException {
@@ -750,7 +1236,7 @@ public class SbwTest {
                 .textColor(keyRedBackground)
                 .fontSize(16)
                 .font(HELVETICA_BOLD)
-                .borderWidthBottom(2f)
+                .paddingBottom(5f)
                 .borderWidth(borderWidth)
                 .build();
 
@@ -840,7 +1326,8 @@ public class SbwTest {
         if (recData.getSubTitle() == null) {
             return null;
         }
-        TextCell tCell = TextCell.builder().borderWidth(borderWidth).padding(6).text(recData.getSubTitle()).fontSize(12).font(HELVETICA_BOLD).colSpan(2).borderWidth(borderWidth).build();
+        TextCell tCell =
+                TextCell.builder().borderWidth(borderWidth).padding(6).text(recData.getSubTitle()).fontSize(12).font(HELVETICA_BOLD).colSpan(2).borderWidth(borderWidth).build();
         //return Row.builder()
         //        .add(TextCell.builder().borderWidth(0).padding(6).text(recData.getSubTitle()).fontSize(12).font(HELVETICA_BOLD).colSpan(2).borderWidth(borderWidth).build())
         //        .backgroundColor(WHITE)
@@ -860,7 +1347,7 @@ public class SbwTest {
                 .paragraph(ParagraphCell.Paragraph.builder()
                         //.append(StyledText.builder().text("This is some text in one font.").font(HELVETICA).build())
                         //.appendNewLine()
-                        .append(StyledText.builder().text("Sign up for ").font(HELVETICA).fontSize(12f). build())
+                        .append(StyledText.builder().text("Sign up for ").font(HELVETICA).fontSize(12f).build())
                         .append(Hyperlink.builder().text("KeyBank Online Banking").url("http://www.key.com").font(HELVETICA_OBLIQUE).fontSize(12f).color(BLUE).build())
                         //.appendNewLine(6f)
                         //.append(StyledText.builder().text("There was the link. And now we are using the default font from the cell.").build())

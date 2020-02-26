@@ -23,5 +23,16 @@ public class TableRec {
     public String getTitle() {
         return title;
     }
+
+    public static class Text {
+
+    }
+
+    enum TextItemType {
+        Normal,
+        Stylized,
+        Hyperlink,
+        Newline
+    }
 }
 
